@@ -54,21 +54,30 @@ def main():
 						else:
 							found_in_mom = 1  
 
+				#EACH CHILD ALLELE MUST BE FOUND, SO THERE SHOULD BE SOME CONDITIONAL STATEMENT
+				#INSIDE THE CHILD ALLELE FOR LOOP
+
+				if found_in_dad == 0 and found_in_mom == 0: #if alleles not found in parents, found_in_dad/mom will = 0
+					print("child allele not in mom or dad") #later, use the record_variant function here to write to output file instead
+				#now it'll go back and check the child's second allele
+				#if that second allele is also not in either, it will print variant line a 2nd time
+
 			# went back and adjusted the indentation of the next if statements. If the following if 
 			# statements are indented, they will be checked after only checking the first child allele.
 			# Have them outside of the for loop allows both child alleles to be compared before
 			# looking at found_in_dad/mom
 
 			#situation where child allele is not found in either parent
-			if found_in_dad == 0 and found_in_mom == 0: #if alleles not found in parents, found_in_dad/mom will = 0
-				print(line)  #later, use the record_variant function here to write to output file instead
+			#if found_in_dad == 0 and found_in_mom == 0: 
+				#print(line)  
 			#this doesn't work because if only one of the child's alleles is found in both parents, both
 			#will = 1, but it should still be a variant need to modify to make sure EACH child allele matches something
 				
-			#situation where both child alleles come from the dad. 
-			#HAVENT TESTED THIS YET. would need a situation where both come from mom also		
-			elif found_in_dad == 1 and found_in_mom == 0: #child alleles only found in dad, none in mom
-				print(line)  #later, use the record_variant function here to write to output file instead
+			#situation where both child alleles come from the dad or both from mom	
+			if found_in_dad == 1 and found_in_mom == 0: #child alleles only found in dad, none in mom
+				print("no child alleles in mom")  #later, use the record_variant function here to write to output file instead
+			elif found_in_dad == 0 and found_in_mom == 1: #child alleles only found in mom, none in dad
+				print("no child alleles in dad")
 			else:
 				print("no variant found") #eventually this should just be "do nothing"
 				
