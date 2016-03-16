@@ -8,6 +8,8 @@ Still have to look into the problem of not all entries being phased in the origi
 Could consider filtering out the unphased entried.  Otherwise figure out how to convert them to phased
 '''
 
+#file input is tab-delimited file created with "vcf-to-tab" VCF tools program
+
 # find-trio-denovo <VCFfilename> <childID> <dadID> <momID>
 
 ################################ OPEN THE TAB-DELIMITED CONVERTED VCF FILE ####################################
@@ -28,9 +30,9 @@ def main():
 			(chrom, pos, ref, childGeno, dadGeno, momGeno)= line.strip("\n").split("\t")
 			
 			#now split the genotypes by into individual alleles
-			(childAllele1, childAllele2) = childGeno.split("/")      #will need to split on "|" also, for the unphased entries
-			(dadAllele1, dadAllele2) = dadGeno.split("/")
-			(momAllele1, momAllele2) = momGeno.split("/")
+			(childAllele1, childAllele2) = childGeno.split("/")    #will need to split on "|" also,
+			(dadAllele1, dadAllele2) = dadGeno.split("/")		   #when the code is applied to VCF containing
+			(momAllele1, momAllele2) = momGeno.split("/")	       #both phased and unphased entries
 
 			#create two lists; one containing both child alleles, the other containing all parent alleles
 			childAlleles = [childAllele1, childAllele2]
@@ -51,18 +53,26 @@ def main():
 							found_in_dad = 1
 						else:
 							found_in_mom = 1  
-				
-				if found_in_dad == 0 and found_in_mom == 0: #if alleles not found in parents, found_in_dad/mom will = 0
-					recordVariant(line)  #write the line to the output file
-				else:
-					print("it's in there somewhere") #eventually this should just be "do nothing"
-				
-				'''
-				If it goes through all 4 parent alleles and doesn't find a match, denovo variant implied.
-				Could exit loop and print variant line if the first child allele isn't found in parents 
-				Wouldn't be a need to check second child allele
-				'''
 
+			# went back and adjusted the indentation of the next if statements. If the following if 
+			# statements are indented, they will be checked after only checking the first child allele.
+			# Have them outside of the for loop allows both child alleles to be compared before
+			# looking at found_in_dad/mom
+
+			#situation where child allele is not found in either parent
+			if found_in_dad == 0 and found_in_mom == 0: #if alleles not found in parents, found_in_dad/mom will = 0
+				print(line)  #later, use the record_variant function here to write to output file instead
+			#this doesn't work because if only one of the child's alleles is found in both parents, both
+			#will = 1, but it should still be a variant need to modify to make sure EACH child allele matches something
+				
+			#situation where both child alleles come from the dad. 
+			#HAVENT TESTED THIS YET. would need a situation where both come from mom also		
+			elif found_in_dad == 1 and found_in_mom == 0: #child alleles only found in dad, none in mom
+				print(line)  #later, use the record_variant function here to write to output file instead
+			else:
+				print("no variant found") #eventually this should just be "do nothing"
+				
+	
 ################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
 #############################################################################################################
 
