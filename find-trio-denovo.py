@@ -123,23 +123,26 @@ def main():
 				#this would keep track of each combination of alleles.  Seems pretty busy though.  Cleaner way?
 				# might be messy to compare all of these combinations
 
-				#for example:
-
 			#child alleles not found in either parent (G/T   C/T   C/T)
 			if in_child1_dad1 == 0 and in_child1_dad2 == 0 and in_child1_mom1 == 0 and in_child1_mom2 == 0:
 				print("first child allele isn't found in either parent")
 			if in_child2_dad1 == 0 and in_child2_dad2 == 0 and in_child2_mom1 == 0 and in_child2_mom2 == 0:
 				print("second child allele isn't found in either parent")
 			
-			#child alleles both found only in dad  (A/G  A/G  T/T)
+			#child alleles both found only in dad  
+				#ex. (A/G  A/G  T/T)
 			if in_child1_dad1 == 1 and in_child1_dad2 == 0 and in_child1_mom1 == 0 and in_child1_mom2 == 0 and in_child2_dad1 == 0 and in_child2_dad2 == 1 and in_child2_mom1 == 0 and in_child2_mom2 == 0:
 				print("both child alleles are only in dad")
 			
-			#both child alleles only match both mom alleles (A/A   G/G    A/A)
+			#child alleles both found only in mom 
+				#ex. (A/A   G/G    A/A)
 			if in_child1_dad1 == 0 and in_child1_dad2 == 0 and in_child1_mom1 == 1 and in_child1_mom2 == 1 and in_child2_dad1 == 0 and in_child2_dad2 == 0 and in_child2_mom1 == 1 and in_child2_mom2 == 1:
 				print("both child alleles are only in mom")
+				#ex. (A/T  G/G   A/T)
+			if in_child1_dad1 == 0 and in_child1_dad2 == 0 and in_child1_mom1 == 1 and in_child1_mom2 == 0 and in_child2_dad1 == 0 and in_child2_dad2 == 0 and in_child2_mom1 == 0 and in_child2_mom2 == 1:
+				print("both child alleles are only in mom")
 
-			#so far this works, but too many options to go through. find a better way
+			#so far this works, but too many options to go through. must be a more efficient way
 
 ################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
 #############################################################################################################
