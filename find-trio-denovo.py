@@ -42,23 +42,25 @@ def main():
 			print("test next line")  #This will print once for each line of the VCF the program goes through
 			
 			#want to check for each child allele in all parent alleles
-			for i in xrange(0,2):   #will check for matches to childAllele1 and then childAllele2
-									#xrange (0,2) looks at index 0, and then index 1. Doesn't include "2"
+			'''
+			for i in range(0,2):   #will check for matches to childAllele1 and then childAllele2
+									#range (0,2) looks at index 0, and then index 1. Doesn't include "2"
 				found_in_dad = 0
 				found_in_mom = 0
 
-				for j in xrange(0,4):  #will check all parent alleles for a match; indices 0-3
+				for j in range(0,4):  #will check all parent alleles for a match; indices 0-3
 					if childAlleles[i] == parentAlleles[j]:
 						if j < 2: #parentAlleles[0] and parentAlleles[1] are dad's alleles. 2 and 3 are mom's
 							found_in_dad = 1
 						else:
 							found_in_mom = 1  
-
+			'''					
 				#EACH CHILD ALLELE MUST BE FOUND, SO THERE SHOULD BE SOME CONDITIONAL STATEMENT
 				#INSIDE THE CHILD ALLELE FOR LOOP
-
+			'''
 				if found_in_dad == 0 and found_in_mom == 0: #if alleles not found in parents, found_in_dad/mom will = 0
 					print("child allele not in mom or dad") #later, use the record_variant function here to write to output file instead
+			'''
 				#now it'll go back and check the child's second allele
 				#if that second allele is also not in either, it will print variant line a 2nd time
 
@@ -67,20 +69,61 @@ def main():
 			# Have them outside of the for loop allows both child alleles to be compared before
 			# looking at found_in_dad/mom
 
-			#situation where child allele is not found in either parent
-			#if found_in_dad == 0 and found_in_mom == 0: 
-				#print(line)  
-			#this doesn't work because if only one of the child's alleles is found in both parents, both
-			#will = 1, but it should still be a variant need to modify to make sure EACH child allele matches something
-				
 			#situation where both child alleles come from the dad or both from mom	
+			'''
 			if found_in_dad == 1 and found_in_mom == 0: #child alleles only found in dad, none in mom
 				print("no child alleles in mom")  #later, use the record_variant function here to write to output file instead
 			elif found_in_dad == 0 and found_in_mom == 1: #child alleles only found in mom, none in dad
 				print("no child alleles in dad")
 			else:
 				print("no variant found") #eventually this should just be "do nothing"
-				
+			'''	
+			#INCORRECTLY PRINTING VARIANT IN 6TH LINE.  
+			#When it compares 2nd child allele, it overwrites the dad/mom values
+			#It only sees that the 2nd isn't in dad, and so dad=0 at the end
+
+
+			'''
+			Need to consider possibility of needing different variables for "found in dad/mom"
+			to keep track of exctly which child allele matches which parent allele, so that the program
+			remembers all the way to the end after making all comparisons
+			'''
+
+			
+
+			for i in range(0,2):   
+
+				found_child_allele_1 = 0
+				found_child_allele_2 = 0
+
+				found_in_1st_dad = 0  #to keep track of 1st of both dad alleles
+				found_in_2nd_dad = 0
+				found_in_1st_mom = 0
+				found_in_2nd_mom = 0
+
+				for j in range(0,4):  #will check all parent alleles for a match; indices 0-3
+					if childAlleles[i] == parentAlleles[j]:
+						if i ==0 and j == 0: #parentAlleles[0] and parentAlleles[1] are dad's 1st and 2nd alleles
+							found_child_allele_1 = 1
+							found_in_1st_dad = 1
+						elif i ==0 and j == 1:
+							found_child_allele_1 = 1
+							found_in_2nd_dad = 1
+						elif i ==0 and j == 2:
+							found_child_allele_1 = 1
+							found_in_1st_mom = 1
+						elif i ==0 and j == 3:
+							found_child_allele_1 = 1
+							found_in_2nd_mom = 1
+							
+				if found_in_1st_dad == 0 and found_in_2nd_dad == 0 and found_in_1st_mom == 0 and found_in_2nd_mom == 0: 
+					print("THIS WORKS") 
+
+				# maybe need to save "found_in" values after each pass through the loops before resetting them to 0
+				# so that each combination is saved separately. Otherwise the values will overwrite each other.
+			
+
+
 	
 ################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
 #############################################################################################################
