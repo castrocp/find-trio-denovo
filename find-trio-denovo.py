@@ -88,42 +88,39 @@ def main():
 			to keep track of exctly which child allele matches which parent allele, so that the program
 			remembers all the way to the end after making all comparisons
 			'''
-
+			in_child1_dad1 = 0
+			in_child1_dad2 = 0
+			in_child1_mom1 = 0
+			in_child1_mom2 = 0
+			in_child2_dad1 = 0
+			in_child2_dad2 = 0
+			in_child2_mom1 = 0
 			
-
 			for i in range(0,2):   
-
-				found_child_allele_1 = 0
-				found_child_allele_2 = 0
-
-				found_in_1st_dad = 0  #to keep track of 1st of both dad alleles
-				found_in_2nd_dad = 0
-				found_in_1st_mom = 0
-				found_in_2nd_mom = 0
 
 				for j in range(0,4):  #will check all parent alleles for a match; indices 0-3
 					if childAlleles[i] == parentAlleles[j]:
-						if i ==0 and j == 0: #parentAlleles[0] and parentAlleles[1] are dad's 1st and 2nd alleles
-							found_child_allele_1 = 1
-							found_in_1st_dad = 1
-						elif i ==0 and j == 1:
-							found_child_allele_1 = 1
-							found_in_2nd_dad = 1
-						elif i ==0 and j == 2:
-							found_child_allele_1 = 1
-							found_in_1st_mom = 1
-						elif i ==0 and j == 3:
-							found_child_allele_1 = 1
-							found_in_2nd_mom = 1
-							
-				if found_in_1st_dad == 0 and found_in_2nd_dad == 0 and found_in_1st_mom == 0 and found_in_2nd_mom == 0: 
-					print("THIS WORKS") 
+						#parentAlleles[0] and parentAlleles[1] are dad's 1st and 2nd alleles
+						if i==0 and j==0: 
+							in_child1_dad1 = 1
+						elif i==0 and j==1:
+							in_child1_dad2 = 1
+						elif i==0 and j==2:
+							in_child1_mom1 = 1
+						elif i==0 and j==3:
+							in_child1_mom2 = 1
 
-				# maybe need to save "found_in" values after each pass through the loops before resetting them to 0
-				# so that each combination is saved separately. Otherwise the values will overwrite each other.
-			
-
-
+						elif i==1 and j==0: 
+							in_child2_dad1 = 1
+						elif i==1 and j==1:
+							in_child2_dad2 = 1
+						elif i==1 and j==2:
+							in_child2_mom1 = 1
+						elif i==1 and j==3:
+							in_child2_mom2 = 1
+				
+				#this would keep track of each combination of alleles.  Seems pretty busy though.  Cleaner way?
+				# might be messy to compare all of these combinations
 	
 ################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
 #############################################################################################################
