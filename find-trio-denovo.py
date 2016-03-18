@@ -3,14 +3,12 @@
 from __future__ import print_function
 import sys
 
-'''
-Still have to look into the problem of not all entries being phased in the original VCF.
-Could consider filtering out the unphased entried.  Otherwise figure out how to convert them to phased
-'''
+
+#Still have to consider the problem of not all entries being phased in the original VCF.
 
 #file input is tab-delimited file created with "vcf-to-tab" VCF tools program
 
-# find-trio-denovo <VCFfilename> <childID> <dadID> <momID>
+#find-trio-denovo <VCFfilename> <childID> <dadID> <momID>
 
 ################################ OPEN THE TAB-DELIMITED CONVERTED VCF FILE ####################################
 #############################################################################################################
@@ -21,8 +19,8 @@ def main():
 	momGeno = sys.argv[4]
 
 #not sure how this will work, because the IDs might not always be in this order in the converted VCF file. 
-#They just hapen to be for the practice vcf file.  Will have to be changed when the child's ID is in a 
-#different column
+#They just hapen to be for the practice vcf file.  Will have to be changed if child and parent IDs are
+#in a different order.
 	
 	with open (inFileName,'r') as infile:  #when you use "with open" you don't have to close the file later
 		next(infile) #Skips the header. Will need to go back to print header once though
@@ -37,60 +35,16 @@ def main():
 			#create two lists; one containing both child alleles, the other containing all parent alleles
 			childAlleles = [childAllele1, childAllele2]
 			parentAlleles = [dadAllele1, dadAllele2, momAllele1, momAllele2]
-			
-							 				
+						 				
 			print("test next line")  #This will print once for each line of the VCF the program goes through
 			
-			#want to check for each child allele in all parent alleles
-			'''
-			for i in range(0,2):   #will check for matches to childAllele1 and then childAllele2
-									#range (0,2) looks at index 0, and then index 1. Doesn't include "2"
-				found_in_dad = 0
-				found_in_mom = 0
-
-				for j in range(0,4):  #will check all parent alleles for a match; indices 0-3
-					if childAlleles[i] == parentAlleles[j]:
-						if j < 2: #parentAlleles[0] and parentAlleles[1] are dad's alleles. 2 and 3 are mom's
-							found_in_dad = 1
-						else:
-							found_in_mom = 1  
-			'''					
-				#EACH CHILD ALLELE MUST BE FOUND, SO THERE SHOULD BE SOME CONDITIONAL STATEMENT
-				#INSIDE THE CHILD ALLELE FOR LOOP
-			'''
-				if found_in_dad == 0 and found_in_mom == 0: #if alleles not found in parents, found_in_dad/mom will = 0
-					print("child allele not in mom or dad") #later, use the record_variant function here to write to output file instead
-			'''
-				#now it'll go back and check the child's second allele
-				#if that second allele is also not in either, it will print variant line a 2nd time
-
-			# went back and adjusted the indentation of the next if statements. If the following if 
-			# statements are indented, they will be checked after only checking the first child allele.
-			# Have them outside of the for loop allows both child alleles to be compared before
-			# looking at found_in_dad/mom
-
-			#situation where both child alleles come from the dad or both from mom	
-			'''
-			if found_in_dad == 1 and found_in_mom == 0: #child alleles only found in dad, none in mom
-				print("no child alleles in mom")  #later, use the record_variant function here to write to output file instead
-			elif found_in_dad == 0 and found_in_mom == 1: #child alleles only found in mom, none in dad
-				print("no child alleles in dad")
-			else:
-				print("no variant found") #eventually this should just be "do nothing"
-			'''	
-		
-			'''
-			Need to consider possibility of needing different variables for "found in dad/mom"
-			to keep track of exctly which child allele matches which parent allele, so that the program
-			remembers all the way to the end after making all comparisons
-			'''
 			child1_in_dad = 0   #first child allele found in either dad allele
 			child2_in_dad = 0
 			child1_in_mom = 0
 			child2_in_mom = 0
 
+			#want to check for each child allele in all parent alleles
 			for i in range(0,2):   
-
 				for j in range(0,4):  #will check all parent alleles for a match; indices 0-3
 					if childAlleles[i] == parentAlleles[j]:
 					#parentAlleles[0] and parentAlleles[1] are dad's 1st and 2nd alleles
@@ -116,10 +70,23 @@ def main():
 						elif i==1 and j==3:
 							child2_in_mom = 1
 
-			if child1_in_dad == 0:
+						#child2 in dad and child1 in mom not being used at this point
+						#should be useful when unphased data is incorporated though
+
+			# The following statements need to be outside of for loop, once all child/parent alleles have been
+			# compared. Previously had them inside for loop, and that's dumb.
+	
+			if child1_in_dad == 0 and child2_in_mom == 0:
+				print("variant because neither child allele in parents")
+			elif child1_in_dad == 0:
 				print("variant because child1 isn't in dad")
-			if child2_in_mom ==0:
+			elif child2_in_mom ==0:
 				print("variant because child2 isn't in mom")
+
+			# only want to print once, so only consider one situation at a time with elif. Once any single variant
+			# situation is true, print and exit to move to next line. For now I don't care which specific
+			# variant situation I have; only whether it's a variant or not. 
+			 
 
 				
 			'''
