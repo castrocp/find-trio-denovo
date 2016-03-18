@@ -78,50 +78,53 @@ def main():
 			else:
 				print("no variant found") #eventually this should just be "do nothing"
 			'''	
-			#INCORRECTLY PRINTING VARIANT IN 6TH LINE.  
-			#When it compares 2nd child allele, it overwrites the dad/mom values
-			#It only sees that the 2nd isn't in dad, and so dad=0 at the end
-
-
+		
 			'''
 			Need to consider possibility of needing different variables for "found in dad/mom"
 			to keep track of exctly which child allele matches which parent allele, so that the program
 			remembers all the way to the end after making all comparisons
 			'''
-			in_child1_dad1 = 0
-			in_child1_dad2 = 0
-			in_child1_mom1 = 0
-			in_child1_mom2 = 0
-			in_child2_dad1 = 0
-			in_child2_dad2 = 0
-			in_child2_mom1 = 0
-			in_child2_mom2 = 0
-			
+			child1_in_dad = 0   #first child allele found in either dad allele
+			child2_in_dad = 0
+			child1_in_mom = 0
+			child2_in_mom = 0
+
 			for i in range(0,2):   
 
 				for j in range(0,4):  #will check all parent alleles for a match; indices 0-3
 					if childAlleles[i] == parentAlleles[j]:
-						#parentAlleles[0] and parentAlleles[1] are dad's 1st and 2nd alleles
+					#parentAlleles[0] and parentAlleles[1] are dad's 1st and 2nd alleles
+					#parentAlleles[2] and parentAlleles[3] are mom's 1st and 2nd alleles
+						
+						#check child's first allele
 						if i==0 and j==0: 
-							in_child1_dad1 = 1
+							child1_in_dad = 1
 						elif i==0 and j==1:
-							in_child1_dad2 = 1
+							child1_in_dad = 1
 						elif i==0 and j==2:
-							in_child1_mom1 = 1
+							child1_in_mom = 1
 						elif i==0 and j==3:
-							in_child1_mom2 = 1
-
+							child1_in_mom = 1
+ 						
+ 						#check child's second allele
 						elif i==1 and j==0: 
-							in_child2_dad1 = 1
+							child2_in_dad = 1
 						elif i==1 and j==1:
-							in_child2_dad2 = 1
+							child2_in_dad = 1
 						elif i==1 and j==2:
-							in_child2_mom1 = 1
+							child2_in_mom = 1
 						elif i==1 and j==3:
-							in_child2_mom2 = 1
+							child2_in_mom = 1
+
+			if child1_in_dad == 0:
+				print("variant because child1 isn't in dad")
+			if child2_in_mom ==0:
+				print("variant because child2 isn't in mom")
+
 				
-				#this would keep track of each combination of alleles.  Seems pretty busy though.  Cleaner way?
-				# might be messy to compare all of these combinations
+			'''
+			Might need to keep track of individual parent alleles when dealing with unphased
+			data, but for now going to ignore this
 
 			#child alleles not found in either parent (G/T   C/T   C/T)
 			if in_child1_dad1 == 0 and in_child1_dad2 == 0 and in_child1_mom1 == 0 and in_child1_mom2 == 0:
@@ -143,6 +146,7 @@ def main():
 				print("both child alleles are only in mom")
 
 			#so far this works, but too many options to go through. must be a more efficient way
+			'''
 
 ################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
 #############################################################################################################
