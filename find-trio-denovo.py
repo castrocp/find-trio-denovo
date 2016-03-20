@@ -3,6 +3,7 @@
 from __future__ import print_function
 import sys
 import re
+import csv
 
 
 #Still have to consider the problem of not all entries being phased in the original VCF.
@@ -29,13 +30,19 @@ def main():
 			(chrom, pos, ref, childGeno, dadGeno, momGeno)= line.strip("\n").split("\t")
 			
 			#now split the genotypes by into individual alleles
-			(childAllele1, childAllele2) = re.split(r"/|\|",childGeno)   #will split on "/" or "|"
-			(dadAllele1, dadAllele2) = re.split(r"/|\|",dadGeno)	     #to apply to both phased and unphased entries
+			(childAllele1, childAllele2) = re.split(r"/|\|",childGeno)  #will split on "/" or "|"
+			(dadAllele1, dadAllele2) = re.split(r"/|\|",dadGeno)	    #to apply to both phased and unphased entries
 			(momAllele1, momAllele2) = re.split(r"/|\|",momGeno)	   
 
-			#IS THERE A WAY TO KEEP TRACK OF WHICH CHARACTER WAS SPLIT ON?
-			#THAT WAY I WOULD KNOW WHICH SET OF VARIANT CONDITIONS TO CONSIDER, DEPENDING ON 
-			#IF I'M DEALING WITH A PHASED OR UNPHASED LINE
+			#checks which delimiter was used.  / = phased .   | = unphased
+			#assumes that delimiters on dadGeno and momGeno are same as childGeno 
+			dialect = csv.Sniffer().sniff(childGeno,["/","|"])
+			delim = (dialect.delimiter)
+
+			if delim == "/":
+				print("phased")
+			else:
+				print("unphased")
 
 			#create two lists; one containing both child alleles, the other containing all parent alleles
 			childAlleles = [childAllele1, childAllele2]
