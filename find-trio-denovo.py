@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import sys
+import re
 
 
 #Still have to consider the problem of not all entries being phased in the original VCF.
@@ -28,9 +29,13 @@ def main():
 			(chrom, pos, ref, childGeno, dadGeno, momGeno)= line.strip("\n").split("\t")
 			
 			#now split the genotypes by into individual alleles
-			(childAllele1, childAllele2) = childGeno.split("/")    #will need to split on "|" also,
-			(dadAllele1, dadAllele2) = dadGeno.split("/")		   #when the code is applied to VCF containing
-			(momAllele1, momAllele2) = momGeno.split("/")	       #both phased and unphased entries
+			(childAllele1, childAllele2) = re.split(r"/|\|",childGeno)   #will split on "/" or "|"
+			(dadAllele1, dadAllele2) = re.split(r"/|\|",dadGeno)	     #to apply to both phased and unphased entries
+			(momAllele1, momAllele2) = re.split(r"/|\|",momGeno)	   
+
+			#IS THERE A WAY TO KEEP TRACK OF WHICH CHARACTER WAS SPLIT ON?
+			#THAT WAY I WOULD KNOW WHICH SET OF VARIANT CONDITIONS TO CONSIDER, DEPENDING ON 
+			#IF I'M DEALING WITH A PHASED OR UNPHASED LINE
 
 			#create two lists; one containing both child alleles, the other containing all parent alleles
 			childAlleles = [childAllele1, childAllele2]
@@ -73,19 +78,24 @@ def main():
 						#child2 in dad and child1 in mom not being used at this point
 						#should be useful when unphased data is incorporated though
 
-			# The following statements need to be outside of for loop, once all child/parent alleles have been
-			# compared. Previously had them inside for loop, and that's dumb.
+			# only want to print/write once, so only consider one situation at a time with elif and or. Once any single variant
+			# situation is true, print and exit to move to next line. For now I don't care which specific
+			# variant situation I have; only whether it's a variant or not. 
 	
 			if child1_in_dad == 0 and child2_in_mom == 0:
 				print("variant because neither child allele in parents")
-			elif child1_in_dad == 0:
-				print("variant because child1 isn't in dad")
-			elif child2_in_mom ==0:
-				print("variant because child2 isn't in mom")
+			elif child1_in_dad == 0 or child2_in_mom == 0:	
+				print("variant because one of the variants isn't in the correct parent")
 
-			# only want to print once, so only consider one situation at a time with elif. Once any single variant
-			# situation is true, print and exit to move to next line. For now I don't care which specific
-			# variant situation I have; only whether it's a variant or not. 
+			# incorporate unphased situations
+			# each child allele can now come from either parent, so it's a variant only if it's not in either
+			# before, only checked first child allele against dad. now need to check against mom also.
+			elif child1_in_dad == 0 and child1_in_mom == 0:
+				print("unphased variant")
+			elif child2_in_mom == 0 and child2_in_dad == 0:
+				print("unphased variant")
+
+			
 			 
 
 				
