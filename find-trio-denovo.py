@@ -30,10 +30,8 @@ def main():
 				
 				#now split the genotypes by into individual alleles
 				(childAllele1, childAllele2) = re.split(r"/|\|",childGeno)  #will split on "/" or "|"
-				(dadAllele1, dadAllele2) = re.split(r"/|\|",dadGeno)	    #to apply to both phased and unphased entries
-				(momAllele1, momAllele2) = re.split(r"/|\|",momGeno)	   
-
-				print("test next line")  #This will print once for each line of the VCF the program goes through
+				(dadAllele1, dadAllele2) = re.split(r"/|\|",dadGeno)	    #to apply to both phased 
+				(momAllele1, momAllele2) = re.split(r"/|\|",momGeno)	    #and unphased entries
 
 				#checks which delimiter was used.  / = phased .   | = unphased
 				#assumes that delimiters on dadGeno and momGeno are same as childGeno 
