@@ -19,15 +19,11 @@ def main():
 
 	with open (inFileName,'r') as infile:  #when you use "with open" you don't have to close the file later
 		for line in infile:
-			if line.startswith("#"):   #print the header lines
-				print(line)
+			if line.startswith("#"):   # header and info lines start with "#"
+				print(line.strip("\n"))   #later, instead of printing, write to file
 			else:
 				(chrom, pos, ID, ref, alt, qual, Filter, info, format, dadgeno, momgeno, childgeno)= line.strip("\n").split("\t")
 				#FIND OUT IF TRIO VCF FILES ALWAYS HAVE DAD/MOM/CHILD IN THAT ORDER.  
-
-				print(dadgeno)
-				print(momgeno)
-				print(childgeno)
 
 				# practice data is in format Genotype:Quality:ReadDepth
 				# This won't necessarily be the same format for all VCF files though
@@ -38,30 +34,22 @@ def main():
 				(momGeno, momQual, childDepth) = momgeno.split(":")
 				(childGeno, childQual, childDepth) = childgeno.split(":")
 
-				print(dadGeno)
+				print(dadGeno)  #testing
 				print(momGeno)
 				print(childGeno)
 				
 				#now split the genotypes into individual alleles
-				(childAllele1, childAllele2) = re.split(r"/|\|",childGeno)  #will split on "/" or "|"
+				#will split on "/" or "|"
 				(dadAllele1, dadAllele2) = re.split(r"/|\|",dadGeno)	    #to apply to both phased 
 				(momAllele1, momAllele2) = re.split(r"/|\|",momGeno)	    #and unphased entries
+				(childAllele1, childAllele2) = re.split(r"/|\|",childGeno)
 
-				print(dadAllele1)
-				print(dadAllele2)
-				print(momAllele1)
-				print(momAllele2)
-				print(childAllele1)
-				print(childAllele2)
-
-
-'''
-				#checks which delimiter was used.  / = phased .   | = unphased
-				#assumes that delimiters on dadGeno and momGeno are same as childGeno 
-				dialect = csv.Sniffer().sniff(childGeno,["/","|"])
+				#checks which delimiter was used.  | = phased .   / = unphased
+				#assumes that delimiter on dadGeno is same as momGeno and childGeno 
+				dialect = csv.Sniffer().sniff(dadGeno,["/","|"])
 				delim = (dialect.delimiter)
 
-				if delim == "/":   #testing
+				if delim == "|":   #testing
 					print("this line is phased")
 				else:
 					print("this line is unphased")
@@ -71,7 +59,7 @@ def main():
 				parentAlleles = [dadAllele1, dadAllele2, momAllele1, momAllele2]
 				
 				child1_in_dad = 0   #to track whether alleles match or not
-				child2_in_dad = 0
+				child2_in_dad = 0   
 				child1_in_mom = 0
 				child2_in_mom = 0
 
@@ -102,18 +90,24 @@ def main():
 							elif i==1 and j==3:
 								child2_in_mom = 1
 
+				#The following conditions were written when I was taking all 4 nucleotides into account
+				#In a VCF, it will usually only be comparing a "0" (ref) or "1" (alt)
+				#It still works, but might be more than what's necessary
+
 				# Variant conditions if the data is phased
-				if delim == "/":
+				if delim == "|":
 					if child1_in_dad == 0 and child2_in_mom == 0:
 						print("variant because neither child allele in parents")
 					elif child1_in_dad == 0 or child2_in_mom == 0:	
-						print("variant because one of the variants isn't in the correct parent")
+						print("variant because one parent didn't contribute an allele")
+					else:   #testing. remove later
+						print("no variant") #testing. remove later
 
 				# Variant conditions if the data is unphased
 				# each child allele can now come from either parent, so it's a variant only if it's not in either parent
 				# before, only checked first child allele against dad. now need to check against mom also.
 					
-				elif delim == "|":   #can just be "else"  Wrote it out to make it clear for now
+				elif delim == "/":   #can just be "else"  Wrote it out to make it clear for now
 					if child1_in_dad == 0 and child1_in_mom == 0:
 						print("variant because child1 not in either parent")
 					elif child2_in_mom == 0 and child2_in_dad == 0:
@@ -122,8 +116,10 @@ def main():
 						print("variant because neither child allele in dad")
 					elif child1_in_mom == 0 and child2_in_mom ==0:
 						print("variant because neither child allele in mom")
+					else:   #testing. remove later
+						print("no variant") #testing. remove later
 
-'''
+
 ################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
 #############################################################################################################
 
