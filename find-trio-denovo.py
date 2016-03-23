@@ -13,26 +13,49 @@ import csv
 #############################################################################################################
 def main():
 	inFileName = sys.argv[1] 
-	childGeno  = sys.argv[2]
-	dadGeno = sys.argv[3]
-	momGeno = sys.argv[4]
+	#dadGeno = sys.argv[2]   #not sure why I originally wrote this.  Arguments don't seem to be necessary.
+	#momGeno= sys.argv[3]
+	#childGeno= sys.argv[4]
 
-#not sure how this will work, because the IDs might not always be in this order in the converted VCF file. 
-#They just hapen to be for the practice vcf file.  Will have to be changed if child and parent IDs are
-#in a different order.
-	
 	with open (inFileName,'r') as infile:  #when you use "with open" you don't have to close the file later
 		for line in infile:
 			if line.startswith("#"):   #print the header lines
 				print(line)
 			else:
-				(chrom, pos, ref, childGeno, dadGeno, momGeno)= line.strip("\n").split("\t")
+				(chrom, pos, ID, ref, alt, qual, Filter, info, format, dadgeno, momgeno, childgeno)= line.strip("\n").split("\t")
+				#FIND OUT IF TRIO VCF FILES ALWAYS HAVE DAD/MOM/CHILD IN THAT ORDER.  
+
+				print(dadgeno)
+				print(momgeno)
+				print(childgeno)
+
+				# practice data is in format Genotype:Quality:ReadDepth
+				# This won't necessarily be the same format for all VCF files though
+				#FIGURE OUT WHAT TO DO ABOUT THIS
+
+				# split each of the dad/mom/child columns by ":", to access only the genotype
+				(dadGeno, dadQual, dadDepth) = dadgeno.split(":")
+				(momGeno, momQual, childDepth) = momgeno.split(":")
+				(childGeno, childQual, childDepth) = childgeno.split(":")
+
+				print(dadGeno)
+				print(momGeno)
+				print(childGeno)
 				
-				#now split the genotypes by into individual alleles
+				#now split the genotypes into individual alleles
 				(childAllele1, childAllele2) = re.split(r"/|\|",childGeno)  #will split on "/" or "|"
 				(dadAllele1, dadAllele2) = re.split(r"/|\|",dadGeno)	    #to apply to both phased 
 				(momAllele1, momAllele2) = re.split(r"/|\|",momGeno)	    #and unphased entries
 
+				print(dadAllele1)
+				print(dadAllele2)
+				print(momAllele1)
+				print(momAllele2)
+				print(childAllele1)
+				print(childAllele2)
+
+
+'''
 				#checks which delimiter was used.  / = phased .   | = unphased
 				#assumes that delimiters on dadGeno and momGeno are same as childGeno 
 				dialect = csv.Sniffer().sniff(childGeno,["/","|"])
@@ -100,6 +123,7 @@ def main():
 					elif child1_in_mom == 0 and child2_in_mom ==0:
 						print("variant because neither child allele in mom")
 
+'''
 ################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
 #############################################################################################################
 
