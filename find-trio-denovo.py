@@ -4,6 +4,7 @@ from __future__ import print_function
 import sys
 import re
 import csv
+import time
 
 #file input is tab-delimited file created with "vcf-to-tab" VCF tools program
 
@@ -12,11 +13,13 @@ import csv
 ################################ OPEN THE TAB-DELIMITED CONVERTED VCF FILE ####################################
 #############################################################################################################
 def main():
+	startTime = time.time()
 	inFileName = sys.argv[1] 
 	#dadGeno = sys.argv[2]   #not sure why I originally wrote this.  Arguments don't seem to be necessary.
 	#momGeno= sys.argv[3]
 	#childGeno= sys.argv[4]
 
+	variant_count = 0
 	with open (inFileName,'r') as infile:  #when you use "with open" you don't have to close the file later
 		for line in infile:
 			if line.startswith("#"):   # header and info lines start with "#"
@@ -27,17 +30,13 @@ def main():
 
 				# practice data is in format Genotype:Quality:ReadDepth
 				# This won't necessarily be the same format for all VCF files though
-				#FIGURE OUT WHAT TO DO ABOUT THIS
+				#create array of X length, and just refer to first element of array
 
 				# split each of the dad/mom/child columns by ":", to access only the genotype
 				(dadGeno, dadQual, dadDepth) = dadgeno.split(":")
 				(momGeno, momQual, childDepth) = momgeno.split(":")
 				(childGeno, childQual, childDepth) = childgeno.split(":")
 
-				print(dadGeno)  #testing
-				print(momGeno)
-				print(childGeno)
-				
 				#now split the genotypes into individual alleles
 				#will split on "/" or "|"
 				(dadAllele1, dadAllele2) = re.split(r"/|\|",dadGeno)	    #to apply to both phased 
@@ -49,10 +48,12 @@ def main():
 				dialect = csv.Sniffer().sniff(dadGeno,["/","|"])
 				delim = (dialect.delimiter)
 
+				'''
 				if delim == "|":   #testing
 					print("this line is phased")
 				else:
 					print("this line is unphased")
+				'''
 
 				#create two lists; one containing both child alleles, the other containing all parent alleles
 				childAlleles = [childAllele1, childAllele2]
@@ -97,28 +98,33 @@ def main():
 				# Variant conditions if the data is phased
 				if delim == "|":
 					if child1_in_dad == 0 and child2_in_mom == 0:
-						print("variant because neither child allele in parents")
+						print(line) # variant because neither child allele in parents
+						variant_count +=1
 					elif child1_in_dad == 0 or child2_in_mom == 0:	
-						print("variant because one parent didn't contribute an allele")
-					else:   #testing. remove later
-						print("no variant") #testing. remove later
-
+						print(line) #variant because one parent didn't contribute an allele
+						variant_count +=1
+					
 				# Variant conditions if the data is unphased
 				# each child allele can now come from either parent, so it's a variant only if it's not in either parent
 				# before, only checked first child allele against dad. now need to check against mom also.
 					
 				elif delim == "/":   #can just be "else"  Wrote it out to make it clear for now
 					if child1_in_dad == 0 and child1_in_mom == 0:
-						print("variant because child1 not in either parent")
+						print(line) #variant because child1 not in either parent
+						variant_count +=1
 					elif child2_in_mom == 0 and child2_in_dad == 0:
-						print("variant because child2 not in either parent")
+						print(line) #variant because child2 not in either parent
+						variant_count +=1
 					elif child1_in_dad == 0 and child2_in_dad ==0:
-						print("variant because neither child allele in dad")
+						print(line) #variant because neither child allele in dad
+						variant_count +=1
 					elif child1_in_mom == 0 and child2_in_mom ==0:
-						print("variant because neither child allele in mom")
-					else:   #testing. remove later
-						print("no variant") #testing. remove later
-
+						print(line) #variant because neither child allele in mom
+						variant_count +=1
+				
+	print()
+	print('The script took {0} minutes'.format( (time.time() - startTime)/60 ) )
+	print(str(variant_count) + " variants were found")
 
 ################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
 #############################################################################################################
