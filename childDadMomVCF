@@ -1,0 +1,19 @@
+##fileformat=VCFv4.0
+##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele, ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/pilot_data/technical/reference/ancestral_alignments/README">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=HM2,Number=0,Type=Flag,Description="HapMap2 membership">
+##INFO=<ID=HM3,Number=0,Type=Flag,Description="HapMap3 membership">
+##reference=human_b36_both.fasta
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA12878	NA12891	NA12892
+chr1	62203	rs28402963	T	C	.	PASS	AA=C;DP=84	GT:GQ:DP	1/1	1/1:44:23	0/0:43:20
+chr1	752566	rs3094315	G	A	.	PASS	AA=g;DP=132;HM2	GT:GQ:DP	1|1	1|1:100:38	1|1:59:30
+chr1	752721	rs3131972	A	G	.	PASS	AA=a;DP=160;HM3	GT:GQ:DP	0|0	1|1:100:50	1|1:100:33
+chr1	754503	rs3115859	G	A	.	PASS	AA=g;DP=127	GT:GQ:DP	1|1	0|1:80:31	0|1:100:34
+chr1	756380	rs3131963	T	A	.	PASS	AA=t;DP=105	GT:GQ:DP	1|1	1|1:52:29	1|1:43:24
+chr1	756912	rs6699990	A	G	.	PASS	AA=N;DP=120	GT:GQ:DP	0|0	1|1:100:34	0|0:89:30
+chr1	757640	rs3115853	G	A	.	PASS	AA=-;DP=113	GT:GQ:DP	1|1	1|1:100:37	1|1:61:25
+chr1	757734	rs4951929	C	T	.	PASS	AA=c;DP=129	GT:GQ:DP	1/1	1/0:100:36	1/0:86:28
+chr1	757936	rs4951862	C	A	.	PASS	AA=c;DP=97	GT:GQ:DP	1/1	0/0:67:26	1/1:44:13
