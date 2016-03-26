@@ -6,37 +6,47 @@ import re
 import csv
 import time
 
-#file input is tab-delimited file created with "vcf-to-tab" VCF tools program
-
-#find-trio-denovo <VCFfilename> <childID> <dadID> <momID>
+#find-trio-denovo <VCFfilename> <first person> <second person> <third person> (type "dad" "mom" or "child")
 
 ################################ OPEN THE TAB-DELIMITED CONVERTED VCF FILE ####################################
 #############################################################################################################
 def main():
 	startTime = time.time()
 	inFileName = sys.argv[1] 
-	#dadGeno = sys.argv[2]   #not sure why I originally wrote this.  Arguments don't seem to be necessary.
-	#momGeno= sys.argv[3]
-	#childGeno= sys.argv[4]
+	firstCol = sys.argv[2]   # user inputs the order of the parent and child columns
+	secondCol = sys.argv[3]  # so that the program knows which is being read
+	thirdCol = sys.argv[4]
 
 	variant_count = 0
 	with open (inFileName,'r') as infile:  #when you use "with open" you don't have to close the file later
 		for line in infile:
 			if line.startswith("#"):   # header and info lines start with "#"
 				print(line.strip("\n"))   #later, instead of printing, write to file
-			else:
-				(chrom, pos, ID, ref, alt, qual, Filter, info, format, dadgeno, momgeno, childgeno)= line.strip("\n").split("\t")
-				#FIND OUT IF TRIO VCF FILES ALWAYS HAVE DAD/MOM/CHILD IN THAT ORDER.  
-
-				# practice data is in format Genotype:Quality:ReadDepth
-				# This won't necessarily be the same format for all VCF files though
-				#create array of X length, and just refer to first element of array
+			else:  
+				if firstCol == "dad" and secondCol == "mom":
+					(chrom, pos, ID, ref, alt, qual, Filter, info, format, dadgeno, momgeno, childgeno)= line.strip("\n").split("\t")
+				elif firstCol == "dad" and secondCol == "child":
+					(chrom, pos, ID, ref, alt, qual, Filter, info, format, dadgeno, childgeno, momgeno)= line.strip("\n").split("\t")
+				elif firstCol == "mom" and secondCol =="dad":
+					(chrom, pos, ID, ref, alt, qual, Filter, info, format, momgeno, dadgeno, childgeno)= line.strip("\n").split("\t")
+				elif firstCol == "mom" and secondCol == "child":
+					(chrom, pos, ID, ref, alt, qual, Filter, info, format, momgeno, childgeno, dadgeno)= line.strip("\n").split("\t")
+				elif firstCol == "child" and secondCol == "dad":
+					(chrom, pos, ID, ref, alt, qual, Filter, info, format, childgeno, dadgeno, momgeno)= line.strip("\n").split("\t")
+				elif firstCol ==  "child" and secondCol == "mom":
+					(chrom, pos, ID, ref, alt, qual, Filter, info, format, childgeno, momgeno, dadgeno)= line.strip("\n").split("\t")
 
 				# split each of the dad/mom/child columns by ":", to access only the genotype
-				(dadGeno, dadQual, dadDepth) = dadgeno.split(":")
-				(momGeno, momQual, childDepth) = momgeno.split(":")
-				(childGeno, childQual, childDepth) = childgeno.split(":")
-
+				# first element of the list is the genotype when format is Genotype:Quality:ReadDepth:etc.
+				dadgeno_list = dadgeno.split(":")
+				dadGeno = (dadgeno_list[0])
+				
+				momgeno_list = momgeno.split(":")
+				momGeno = (momgeno_list[0])
+				
+				childgeno_list = childgeno.split(":")
+				childGeno = (childgeno_list[0])
+				
 				#now split the genotypes into individual alleles
 				#will split on "/" or "|"
 				(dadAllele1, dadAllele2) = re.split(r"/|\|",dadGeno)	    #to apply to both phased 
@@ -47,13 +57,6 @@ def main():
 				#assumes that delimiter on dadGeno is same as momGeno and childGeno 
 				dialect = csv.Sniffer().sniff(dadGeno,["/","|"])
 				delim = (dialect.delimiter)
-
-				'''
-				if delim == "|":   #testing
-					print("this line is phased")
-				else:
-					print("this line is unphased")
-				'''
 
 				#create two lists; one containing both child alleles, the other containing all parent alleles
 				childAlleles = [childAllele1, childAllele2]
@@ -130,7 +133,7 @@ def main():
 #############################################################################################################
 
 def recordVariant(line):
-	file = open("denovoVariants.txt" , "w")
+	file = open("denovoVariants.txt" , "w") 
 	file.write(line)
 	file.close()
 
