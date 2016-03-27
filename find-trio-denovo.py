@@ -8,7 +8,9 @@ import time
 
 #find-trio-denovo <VCFfilename> <first person> <second person> <third person> (type "dad" "mom" or "child")
 
-################################ OPEN THE TAB-DELIMITED CONVERTED VCF FILE ####################################
+#GO BACK AND ADD 2 ARGUMENTS THAT WILL ALLOW THE USER TO NAME THE 2 OUTPUT FILES
+
+################################ OPEN THE VCF FILE ##########################################################
 #############################################################################################################
 def main():
 	startTime = time.time()
@@ -17,11 +19,14 @@ def main():
 	secondCol = sys.argv[3]  # so that the program knows which is being read
 	thirdCol = sys.argv[4]
 
-	variant_count = 0
+	variant_count = 0 #counts phased and unphased variants
+	unphased_count = 0 #separate counter for variants with all lines treated as unphased
+
 	with open (inFileName,'r') as infile:  #when you use "with open" you don't have to close the file later
 		for line in infile:
 			if line.startswith("#"):   # header and info lines start with "#"
-				print(line.strip("\n"))   #later, instead of printing, write to file
+				recordVariant(line)   
+				unphasedVariants(line)
 			else:  
 				if firstCol == "dad" and secondCol == "mom":
 					(chrom, pos, ID, ref, alt, qual, Filter, info, format, dadgeno, momgeno, childgeno)= line.strip("\n").split("\t")
@@ -101,10 +106,10 @@ def main():
 				# Variant conditions if the data is phased
 				if delim == "|":
 					if child1_in_dad == 0 and child2_in_mom == 0:
-						print(line) # variant because neither child allele in parents
+						recordVariant(line) # variant because neither child allele in parents
 						variant_count +=1
 					elif child1_in_dad == 0 or child2_in_mom == 0:	
-						print(line) #variant because one parent didn't contribute an allele
+						recordVariant(line) #variant because one parent didn't contribute an allele
 						variant_count +=1
 					
 				# Variant conditions if the data is unphased
@@ -113,30 +118,63 @@ def main():
 					
 				elif delim == "/":   #can just be "else"  Wrote it out to make it clear for now
 					if child1_in_dad == 0 and child1_in_mom == 0:
-						print(line) #variant because child1 not in either parent
+						recordVariant(line) #variant because child1 not in either parent
+						unphasedVariants(line) #also write to second output file, where all lines are treated as unphased
 						variant_count +=1
+						unphased_count +=1
 					elif child2_in_mom == 0 and child2_in_dad == 0:
-						print(line) #variant because child2 not in either parent
+						recordVariant(line) #variant because child2 not in either parent
+						unphasedVariants(line)
 						variant_count +=1
+						unphased_count +=1
 					elif child1_in_dad == 0 and child2_in_dad ==0:
-						print(line) #variant because neither child allele in dad
+						recordVariant(line) #variant because neither child allele in dad
+						unphasedVariants(line)
 						variant_count +=1
+						unphased_count +=1
 					elif child1_in_mom == 0 and child2_in_mom ==0:
-						print(line) #variant because neither child allele in mom
+						recordVariant(line) #variant because neither child allele in mom
+						unphasedVariants(line)
 						variant_count +=1
+						unphased_count +=1
 				
-	print()
-	print('The script took {0} minutes'.format( (time.time() - startTime)/60 ) )
-	print(str(variant_count) + " variants were found")
+				#Treat phased lines as unphased and record variants in second output file
+				if delim == "|":   
+					if child1_in_dad == 0 and child1_in_mom == 0:
+						unphasedVariants(line) 
+						unphased_count +=1
+					elif child2_in_mom == 0 and child2_in_dad == 0:
+						unphasedVariants(line)
+						unphased_count +=1
+					elif child1_in_dad == 0 and child2_in_dad ==0:
+						unphasedVariants(line)
+						unphased_count +=1
+					elif child1_in_mom == 0 and child2_in_mom ==0:
+						unphasedVariants(line)
+						unphased_count +=1
+
+	recordVariant("\n")			
+	recordVariant('The script took {0} minutes'.format( (time.time() - startTime)/60 ) )
+	recordVariant("\n")
+	recordVariant(str(variant_count) + " phased and unphased variants were found")
+
+	unphasedVariants("\n")	
+	unphasedVariants('The script took {0} minutes'.format( (time.time() - startTime)/60 ) )
+	unphasedVariants("\n")
+	unphasedVariants(str(unphased_count) + " variants were found when all lines were treated as unphased")
 
 ################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
 #############################################################################################################
 
-def recordVariant(line):
-	file = open("denovoVariants.txt" , "w") 
-	file.write(line)
+def recordVariant(line): 
+	file = open("denovoVariants.txt" , "a") #open output file in "append" mode
+	file.write(line) #includes both phased and unphased variants
 	file.close()
 
+def unphasedVariants(line): 			    	#creates a separate output file that records variants 
+	file = open("unphasedVariants.txt" , "a")	#treating all lines as unphased
+	file.write(line)
+	file.close()
 
 if __name__ == '__main__':
 	main()
