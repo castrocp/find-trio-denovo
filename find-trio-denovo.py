@@ -167,12 +167,12 @@ def main():
 #############################################################################################################
 
 def recordVariant(line): 
-	file = open("denovoVariants.txt" , "a") #open output file in "append" mode
-	file.write(line) #includes both phased and unphased variants
+	file = open(sys.argv[1]+".variants" , "a") #open output file in "append" mode
+	file.write(line) 						   #includes both phased and unphased variants
 	file.close()
 
-def unphasedVariants(line): 			    	#creates a separate output file that records variants 
-	file = open("unphasedVariants.txt" , "a")	#treating all lines as unphased
+def unphasedVariants(line): 			    				#creates a separate output file that records variants 
+	file = open(sys.argv[1]+".variants.as.unphased" , "a")	#treating all lines as unphased
 	file.write(line)
 	file.close()
 
