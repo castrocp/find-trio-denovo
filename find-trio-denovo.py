@@ -55,8 +55,8 @@ def main():
                                 #Treat all lines as unphased and record variants in second output file
                                 if ((not child_in_dad[0] and not child_in_mom[0]) or # variant because child1 not in either parent
                                     (not child_in_dad[1] and not child_in_mom[1]) or # variant because child2 not in either parent
-                                    (not child_in_dad[0] and not child_in_dad[1]) or # variant because neither child allele in dad
-                                    (not child_in_mom[0] and not child_in_mom[1])): # variant because neither child allele in mom
+                                    (not all(child_in_dad) or # variant because neither child allele in dad
+                                    (not all(child_in_mom)): # variant because neither child allele in mom
                                         unphasedVariants(line)
                                         unphased_count +=1
 
