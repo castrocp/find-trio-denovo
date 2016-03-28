@@ -8,8 +8,6 @@ import time
 
 #find-trio-denovo <VCFfilename> <first person> <second person> <third person> (type "dad" "mom" or "child")
 
-#GO BACK AND ADD 2 ARGUMENTS THAT WILL ALLOW THE USER TO NAME THE 2 OUTPUT FILES
-
 ################################ OPEN THE VCF FILE ##########################################################
 #############################################################################################################
 def main():
