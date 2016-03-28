@@ -5,38 +5,38 @@ import sys
 import re
 import time
 
-#find-trio-denovo <VCFfilename> <first person> <second person> <third person> (type "dad" "mom" or "child")
+#run program as:
+#find-trio-denovo.py <VCFfilename> <first person> <second person> <third person> (type "dad" "mom" or "child")
 
-################################ OPEN THE VCF FILE ##########################################################
-#############################################################################################################
+
 def main():
-	startTime = time.time()
-	inFileName = sys.argv[1]
-        momIdx = sys.argv.index("mom")
-        dadIdx = sys.argv.index("dad")
-        childIdx = sys.argv.index("child")
+    startTime = time.time()
+    inFileName = sys.argv[1]
+    momIdx = sys.argv.index("mom")  #user inputs the order of the family member columns
+    dadIdx = sys.argv.index("dad")
+    childIdx = sys.argv.index("child")
 
-	variant_count = 0 #counts phased and unphased variants
-	unphased_count = 0 #separate counter for variants with all lines treated as unphased
+    variant_count = 0 #counts phased and unphased variants
+    unphased_count = 0 #separate counter for variants with all lines treated as unphased
 
-	with open (inFileName, 'r') as infile:  #when you use "with open" you don't have to close the file later
-            with open (inFileName + ".variants", "w") as variantFile:
-                with open (inFileName + ".variants.as.unphased", "w") as unphasedFile:
+    with open (inFileName, 'r') as infile:  #when you use "with open" you don't have to close the file later
+            with open (inFileName + ".variants", "w") as variantFile: 
+                with open (inFileName + ".variants.as.unphased", "w") as unphasedFile: 
                     for line in infile:
-                            if line.startswith("#"):   # header and info lines start with "#"
-                                    variantFile.write(line)
-                                    unphasedFile.write(line)
-                            else:
-                                    (is_variant, is_unphased) = process_line(line, dadIdx-2, momIdx-2, childIdx-2, variant_count, unphased_count)
-                                    if is_variant:
-                                        variant_count += 1
-                                        variantFile.write(line)
+                        if line.startswith("#"):   # header and info lines start with "#"
+                            variantFile.write(line) 
+                            unphasedFile.write(line) 
+                        else:
+                            (is_variant, is_unphased) = process_line(line, dadIdx-2, momIdx-2, childIdx-2, variant_count, unphased_count)
+                            if is_variant:
+                                variant_count += 1
+                                variantFile.write(line) #variants with phased and unphased lines treated separately
 
-                                    if is_unphased:
-                                        unphased_count += 1
-                                        unphasedFile.write(line)
+                            if is_unphased:
+                                unphased_count += 1
+                                unphasedFile.write(line) #variants with all lines treated as unphased
 
-                    completion_msg = "\nThe script took {0} minutes\n".format((time.time() - startTime/60))
+                    completion_msg = "\nThe script took {0} minutes\n".format((time.time() - startTime)/60)
 
                     variantFile.write(completion_msg)
                     variantFile.write("{0} phased and unphased variants were found".format(variant_count))
@@ -44,8 +44,6 @@ def main():
                     unphasedFile.write(completion_msg)
                     unphasedFile.write("{0} variants were found when all lines were treated as unphased".format(unphased_count))
 
-################################ CREATE FILE TO STORE DENOVO VARIANT INFO ####################################
-#############################################################################################################
 
 def process_line(line, dadIdx, momIdx, childIdx, variant_count, unphased_count):
         is_unphased = False
@@ -71,23 +69,19 @@ def process_line(line, dadIdx, momIdx, childIdx, variant_count, unphased_count):
         child_in_dad = child_in_parent(childAlleles, dadAlleles)
         child_in_mom = child_in_parent(childAlleles, momAlleles)
 
-        #The following conditions were written when I was taking all 4 nucleotides into account
-        #In a VCF, it will usually only be comparing a "0" (ref) or "1" (alt)
-        #It still works, but might be more than what's necessary
-
         #Treat all lines as unphased and record variants in second output file
         if ((not child_in_dad[0] and not child_in_mom[0]) or # variant because child1 not in either parent
             (not child_in_dad[1] and not child_in_mom[1]) or # variant because child2 not in either parent
             (not child_in_dad[0] and not child_in_dad[1]) or # variant because neither child allele in dad
             (not child_in_mom[0] and not child_in_mom[1])): # variant because neither child allele in mom
-                is_unphased = True
+                is_unphased = True #every line treated as unphased; just needs to meet above conditions
 
-                # Variant conditions if the data is unphased
+                # When a line is truly unphased("/"), phased = false, is_variant = True.  Will print to both files.
                 is_variant = not phased
 
-        # Variant conditions if the data is phased
-        if (phased and (not child_in_dad[0] or not child_in_mom[1])):
-                is_variant = True
+        # Variant conditions if the data is phased, to print only to phased/unphased file
+        if (phased and (not child_in_dad[0] or not child_in_mom[1])): # variant because one or both parents
+                is_variant = True                                     # didn't contribute an allele to the child
 
         return (is_variant, is_unphased)
 
@@ -100,7 +94,7 @@ def extract_genes(unparsed_geno):
         alleles = re.split(r"/|\|", geno)
 
         # checks which delimiter was used. | = phased vs / = unphased
-        phased = geno.find("|") > -1
+        phased = geno.find("|") > -1  #phased is a boolean.  true/false = phased/unphased
 
         return [alleles, phased]
 
