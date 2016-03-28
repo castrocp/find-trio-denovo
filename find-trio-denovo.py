@@ -59,16 +59,10 @@ def main():
                                                 variant_count +=1
 
                                         #Treat phased lines as unphased and record variants in second output file
-                                        if not child_in_dad[0] and not child_in_mom[0]:
-                                                unphasedVariants(line)
-                                                unphased_count +=1
-                                        elif not child_in_dad[1] and not child_in_mom[1]:
-                                                unphasedVariants(line)
-                                                unphased_count +=1
-                                        elif not child_in_dad[0] and not child_in_dad[1]:
-                                                unphasedVariants(line)
-                                                unphased_count +=1
-                                        elif not child_in_mom[0] and not child_in_mom[1]:
+                                        if ((not child_in_dad[0] and not child_in_mom[0]) # variant because child1 not in either parent
+                                            (not child_in_dad[1] and not child_in_mom[1]) # variant because child2 not in either parent
+                                            (not child_in_dad[0] and not child_in_dad[1]) # variant because neither child allele in dad
+                                            (not child_in_mom[0] and not child_in_mom[1])): # variant because neither child allele in mom
                                                 unphasedVariants(line)
                                                 unphased_count +=1
 
@@ -76,24 +70,12 @@ def main():
                                 # each child allele can now come from either parent, so it's a variant only if it's not in either parent
                                 # before, only checked first child allele against dad. now need to check against mom also.
                                 else:
-                                        if not child_in_dad[0] and not child_in_mom[0]: # variant because child1 not in either parent
+                                        if ((not child_in_dad[0] and not child_in_mom[0]) # variant because child1 not in either parent
+                                            (not child_in_dad[1] and not child_in_mom[1]) # variant because child2 not in either parent
+                                            (not child_in_dad[0] and not child_in_dad[1]) # variant because neither child allele in dad
+                                            (not child_in_mom[0] and not child_in_mom[1])): # variant because neither child allele in mom
                                                 recordVariant(line)
-                                                unphasedVariants(line) #also write to second output file, where all lines are treated as unphased
-                                                variant_count +=1
-                                                unphased_count +=1
-                                        elif not child_in_dad[1] and not child_in_mom[1]: # variant because child2 not in either parent
-                                                recordVariant(line)
-                                                unphasedVariants(line)
-                                                variant_count +=1
-                                                unphased_count +=1
-                                        elif not child_in_dad[0] and not child_in_dad[1]: # variant because neither child allele in dad
-                                                recordVariant(line)
-                                                unphasedVariants(line)
-                                                variant_count +=1
-                                                unphased_count +=1
-                                        elif not child_in_mom[0] and not child_in_mom[1]: # variant because neither child allele in mom
-                                                recordVariant(line)
-                                                unphasedVariants(line)
+                                                unphasedVariants(line) # also write to second output file, where all lines are treated as unphased
                                                 variant_count +=1
                                                 unphased_count +=1
 
