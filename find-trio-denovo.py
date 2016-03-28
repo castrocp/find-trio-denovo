@@ -14,7 +14,7 @@ import time
 #############################################################################################################
 def main():
 	startTime = time.time()
-	inFileName = sys.argv[1] 
+	inFileName = sys.argv[1]
         momIdx = sys.argv.index("mom")
         dadIdx = sys.argv.index("dad")
         childIdx = sys.argv.index("child")
@@ -25,20 +25,18 @@ def main():
 	with open (inFileName,'r') as infile:  #when you use "with open" you don't have to close the file later
 		for line in infile:
 			if line.startswith("#"):   # header and info lines start with "#"
-				recordVariant(line)   
+				recordVariant(line)
 				unphasedVariants(line)
-			else:  
-				(chrom, pos, ID, ref, alt, qual, Filter, info, format, samples) = line.strip("\n").split("\t", 9)
+			else:
+                                (chrom, pos, ID, ref, alt, qual, Filter, info, format, samples) = line.strip("\n").split("\t", 9)
                                 samples = samples.split("\t")
                                 dadgeno = samples[dadIdx - 2]
                                 momgeno = samples[momIdx - 2]
                                 childgeno = samples[childIdx - 2]
 
-				[dadAlleles, dadPhased] = extract_genes(dadgeno)
-				[momAlleles, momPhased] = extract_genes(momgeno)
-				[childAlleles, childPhased] = extract_genes(childgeno)
-				# create a list containing all parent alleles
-                                parentAlleles = dadAlleles + momAlleles
+				(dadAlleles, dadPhased) = extract_genes(dadgeno)
+				(momAlleles, momPhased) = extract_genes(momgeno)
+				(childAlleles, childPhased) = extract_genes(childgeno)
 
 				# assumes that delimiter on dadGeno is same as momGeno and childGeno
                                 if dadPhased != momPhased or dadPhased != childPhased:
@@ -47,37 +45,8 @@ def main():
 
                                 phased = dadPhased
 
-				child1_in_dad = 0   #to track whether alleles match or not
-				child2_in_dad = 0   
-				child1_in_mom = 0
-				child2_in_mom = 0
-
-				#want to check for each child allele in all parent alleles
-				for i in range(0,2):   
-					for j in range(0,4):  #will check all parent alleles for a match; indices 0-3
-						if childAlleles[i] == parentAlleles[j]:
-						#parentAlleles[0] and parentAlleles[1] are dad's 1st and 2nd alleles
-						#parentAlleles[2] and parentAlleles[3] are mom's 1st and 2nd alleles
-
-							#check child's first allele
-							if i==0 and j==0: 
-								child1_in_dad = 1
-							elif i==0 and j==1:
-								child1_in_dad = 1
-							elif i==0 and j==2:
-								child1_in_mom = 1
-							elif i==0 and j==3:
-								child1_in_mom = 1
-
-	 						#check child's second allele
-							elif i==1 and j==0:
-								child2_in_dad = 1
-							elif i==1 and j==1:
-								child2_in_dad = 1
-							elif i==1 and j==2:
-								child2_in_mom = 1
-							elif i==1 and j==3:
-								child2_in_mom = 1
+                                child_in_dad = child_in_parent(childAlleles, dadAlleles)
+                                child_in_mom = child_in_parent(childAlleles, momAlleles)
 
 				#The following conditions were written when I was taking all 4 nucleotides into account
 				#In a VCF, it will usually only be comparing a "0" (ref) or "1" (alt)
@@ -85,53 +54,48 @@ def main():
 
 				# Variant conditions if the data is phased
                                 if phased:
-					if child1_in_dad == 0 and child2_in_mom == 0:
-						recordVariant(line) # variant because neither child allele in parents
-						variant_count +=1
-					elif child1_in_dad == 0 or child2_in_mom == 0:
-						recordVariant(line) #variant because one parent didn't contribute an allele
-						variant_count +=1
+                                        if not child_in_dad[0] or not child_in_mom[1]:
+                                                recordVariant(line) # variant because neither child allele in parents
+                                                variant_count +=1
 
-				# Variant conditions if the data is unphased
-				# each child allele can now come from either parent, so it's a variant only if it's not in either parent
-				# before, only checked first child allele against dad. now need to check against mom also.
+                                        #Treat phased lines as unphased and record variants in second output file
+                                        if not child_in_dad[0] and not child_in_mom[0]:
+                                                unphasedVariants(line)
+                                                unphased_count +=1
+                                        elif not child_in_dad[1] and not child_in_mom[1]:
+                                                unphasedVariants(line)
+                                                unphased_count +=1
+                                        elif not child_in_dad[0] and not child_in_dad[1]:
+                                                unphasedVariants(line)
+                                                unphased_count +=1
+                                        elif not child_in_mom[0] and not child_in_mom[1]:
+                                                unphasedVariants(line)
+                                                unphased_count +=1
 
+                                # Variant conditions if the data is unphased
+                                # each child allele can now come from either parent, so it's a variant only if it's not in either parent
+                                # before, only checked first child allele against dad. now need to check against mom also.
                                 else:
-					if child1_in_dad == 0 and child1_in_mom == 0:
-						recordVariant(line) #variant because child1 not in either parent
-						unphasedVariants(line) #also write to second output file, where all lines are treated as unphased
-						variant_count +=1
-						unphased_count +=1
-					elif child2_in_mom == 0 and child2_in_dad == 0:
-						recordVariant(line) #variant because child2 not in either parent
-						unphasedVariants(line)
-						variant_count +=1
-						unphased_count +=1
-					elif child1_in_dad == 0 and child2_in_dad ==0:
-						recordVariant(line) #variant because neither child allele in dad
-						unphasedVariants(line)
-						variant_count +=1
-						unphased_count +=1
-					elif child1_in_mom == 0 and child2_in_mom ==0:
-						recordVariant(line) #variant because neither child allele in mom
-						unphasedVariants(line)
-						variant_count +=1
-						unphased_count +=1
-
-				#Treat phased lines as unphased and record variants in second output file
-                                if phased:
-					if child1_in_dad == 0 and child1_in_mom == 0:
-						unphasedVariants(line) 
-						unphased_count +=1
-					elif child2_in_mom == 0 and child2_in_dad == 0:
-						unphasedVariants(line)
-						unphased_count +=1
-					elif child1_in_dad == 0 and child2_in_dad ==0:
-						unphasedVariants(line)
-						unphased_count +=1
-					elif child1_in_mom == 0 and child2_in_mom ==0:
-						unphasedVariants(line)
-						unphased_count +=1
+                                        if not child_in_dad[0] and not child_in_mom[0]: # variant because child1 not in either parent
+                                                recordVariant(line)
+                                                unphasedVariants(line) #also write to second output file, where all lines are treated as unphased
+                                                variant_count +=1
+                                                unphased_count +=1
+                                        elif not child_in_dad[1] and not child_in_mom[1]: # variant because child2 not in either parent
+                                                recordVariant(line)
+                                                unphasedVariants(line)
+                                                variant_count +=1
+                                                unphased_count +=1
+                                        elif not child_in_dad[0] and not child_in_dad[1]: # variant because neither child allele in dad
+                                                recordVariant(line)
+                                                unphasedVariants(line)
+                                                variant_count +=1
+                                                unphased_count +=1
+                                        elif not child_in_mom[0] and not child_in_mom[1]: # variant because neither child allele in mom
+                                                recordVariant(line)
+                                                unphasedVariants(line)
+                                                variant_count +=1
+                                                unphased_count +=1
 
 	recordVariant("\n")
 	recordVariant('The script took {0} minutes'.format( (time.time() - startTime)/60 ) )
@@ -168,6 +132,13 @@ def extract_genes(unparsed_geno):
         phased = geno.find("|") > -1
 
         return [alleles, phased]
+
+def child_in_parent(childAlleles, parentAlleles):
+        child_in_parent = []
+        for idx, childAllele in enumerate(childAlleles):
+            child_in_parent.insert(idx, childAllele in parentAlleles)
+
+        return child_in_parent
 
 if __name__ == '__main__':
 	main()
