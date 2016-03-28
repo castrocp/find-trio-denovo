@@ -52,32 +52,23 @@ def main():
 				#In a VCF, it will usually only be comparing a "0" (ref) or "1" (alt)
 				#It still works, but might be more than what's necessary
 
+                                #Treat all lines as unphased and record variants in second output file
+                                if ((not child_in_dad[0] and not child_in_mom[0]) or # variant because child1 not in either parent
+                                    (not child_in_dad[1] and not child_in_mom[1]) or # variant because child2 not in either parent
+                                    (not child_in_dad[0] and not child_in_dad[1]) or # variant because neither child allele in dad
+                                    (not child_in_mom[0] and not child_in_mom[1])): # variant because neither child allele in mom
+                                        unphasedVariants(line)
+                                        unphased_count +=1
+
+                                        # Variant conditions if the data is unphased
+                                        if not phased:
+                                            recordVariant(line)
+                                            variant_count +=1
+
 				# Variant conditions if the data is phased
-                                if phased:
-                                        if not child_in_dad[0] or not child_in_mom[1]:
-                                                recordVariant(line) # variant because neither child allele in parents
-                                                variant_count +=1
-
-                                        #Treat phased lines as unphased and record variants in second output file
-                                        if ((not child_in_dad[0] and not child_in_mom[0]) # variant because child1 not in either parent
-                                            (not child_in_dad[1] and not child_in_mom[1]) # variant because child2 not in either parent
-                                            (not child_in_dad[0] and not child_in_dad[1]) # variant because neither child allele in dad
-                                            (not child_in_mom[0] and not child_in_mom[1])): # variant because neither child allele in mom
-                                                unphasedVariants(line)
-                                                unphased_count +=1
-
-                                # Variant conditions if the data is unphased
-                                # each child allele can now come from either parent, so it's a variant only if it's not in either parent
-                                # before, only checked first child allele against dad. now need to check against mom also.
-                                else:
-                                        if ((not child_in_dad[0] and not child_in_mom[0]) # variant because child1 not in either parent
-                                            (not child_in_dad[1] and not child_in_mom[1]) # variant because child2 not in either parent
-                                            (not child_in_dad[0] and not child_in_dad[1]) # variant because neither child allele in dad
-                                            (not child_in_mom[0] and not child_in_mom[1])): # variant because neither child allele in mom
-                                                recordVariant(line)
-                                                unphasedVariants(line) # also write to second output file, where all lines are treated as unphased
-                                                variant_count +=1
-                                                unphased_count +=1
+                                if (phased and (not child_in_dad[0] or not child_in_mom[1])):
+                                        recordVariant(line) # variant because neither child allele in parents
+                                        variant_count +=1
 
 	recordVariant("\n")
 	recordVariant('The script took {0} minutes'.format( (time.time() - startTime)/60 ) )
